@@ -537,7 +537,7 @@ func (asw *actualStateOfWorld) MarkFSResizeRequired(
 	}
 
 	volumePlugin, err :=
-		asw.volumePluginMgr.FindExpandablePluginBySpec(podObj.volumeSpec)
+		asw.volumePluginMgr.FindNodeExpandablePluginBySpec(podObj.volumeSpec)
 	if err != nil || volumePlugin == nil {
 		// Log and continue processing
 		klog.Errorf(

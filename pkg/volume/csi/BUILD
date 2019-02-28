@@ -9,6 +9,7 @@ go_library(
         "csi_mounter.go",
         "csi_plugin.go",
         "csi_util.go",
+        "expander.go",
     ],
     importpath = "k8s.io/kubernetes/pkg/volume/csi",
     visibility = ["//visibility:public"],
@@ -22,6 +23,7 @@ go_library(
         "//staging/src/k8s.io/api/core/v1:go_default_library",
         "//staging/src/k8s.io/api/storage/v1beta1:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/api/errors:go_default_library",
+        "//staging/src/k8s.io/apimachinery/pkg/api/resource:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/apis/meta/v1:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/types:go_default_library",
         "//staging/src/k8s.io/apimachinery/pkg/util/version:go_default_library",
@@ -47,6 +49,7 @@ go_test(
         "csi_mounter_test.go",
         "csi_plugin_test.go",
         "main_test.go",
+        "expander_test.go",
     ],
     embed = [":go_default_library"],
     deps = [

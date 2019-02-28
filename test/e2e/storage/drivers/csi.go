@@ -134,20 +134,57 @@ func (h *hostpathCSIDriver) CleanupDriver() {
 	}
 }
 
-// hostpathV0CSIDriver
-type hostpathV0CSIDriver struct {
-	cleanup    func()
-	driverInfo DriverInfo
+// mockCSI
+type mockCSIDriver struct {
+	driverInfo          testsuites.DriverInfo
+	manifests           []string
+	podInfo             *bool
+	attachable          bool
+	attachLimit         int
+	enableNodeExpansion bool
 }
 
-var _ TestDriver = &hostpathV0CSIDriver{}
-var _ DynamicPVTestDriver = &hostpathV0CSIDriver{}
+// CSIMockDriverOpts defines options used for csi driver
+type CSIMockDriverOpts struct {
+	RegisterDriver      bool
+	DisableAttach       bool
+	PodInfo             *bool
+	AttachLimit         int
+	EnableResizing      bool
+	EnableNodeExpansion bool
+}
 
-// InitHostPathV0CSIDriver returns hostpathV0CSIDriver that implements TestDriver interface
-func InitHostV0PathCSIDriver() TestDriver {
-	return &hostpathV0CSIDriver{
-		driverInfo: DriverInfo{
-			Name:        "csi-hostpath-v0",
+var _ testsuites.TestDriver = &mockCSIDriver{}
+var _ testsuites.DynamicPVTestDriver = &mockCSIDriver{}
+
+// InitMockCSIDriver returns a mockCSIDriver that implements TestDriver interface
+func InitMockCSIDriver(driverOpts CSIMockDriverOpts) testsuites.TestDriver {
+	driverManifests := []string{
+		"test/e2e/testing-manifests/storage-csi/cluster-driver-registrar/rbac.yaml",
+		"test/e2e/testing-manifests/storage-csi/driver-registrar/rbac.yaml",
+		"test/e2e/testing-manifests/storage-csi/external-attacher/rbac.yaml",
+		"test/e2e/testing-manifests/storage-csi/external-provisioner/rbac.yaml",
+		"test/e2e/testing-manifests/storage-csi/external-resizer/rbac.yaml",
+		"test/e2e/testing-manifests/storage-csi/mock/csi-mock-rbac.yaml",
+		"test/e2e/testing-manifests/storage-csi/mock/csi-storageclass.yaml",
+		"test/e2e/testing-manifests/storage-csi/mock/csi-mock-driver.yaml",
+	}
+
+	if driverOpts.RegisterDriver {
+		driverManifests = append(driverManifests, "test/e2e/testing-manifests/storage-csi/mock/csi-mock-cluster-driver-registrar.yaml")
+	}
+
+	if !driverOpts.DisableAttach {
+		driverManifests = append(driverManifests, "test/e2e/testing-manifests/storage-csi/mock/csi-mock-driver-attacher.yaml")
+	}
+
+	if driverOpts.EnableResizing {
+		driverManifests = append(driverManifests, "test/e2e/testing-manifests/storage-csi/mock/csi-mock-driver-resizer.yaml")
+	}
+
+	return &mockCSIDriver{
+		driverInfo: testsuites.DriverInfo{
+			Name:        "csi-mock",
 			FeatureTag:  "",
 			MaxFileSize: testpatterns.FileSizeMedium,
 			SupportedFsType: sets.NewString(
@@ -157,6 +194,11 @@ func InitHostV0PathCSIDriver() TestDriver {
 				CapPersistence: true,
 			},
 		},
+		manifests:           driverManifests,
+		podInfo:             driverOpts.PodInfo,
+		attachable:          !driverOpts.DisableAttach,
+		attachLimit:         driverOpts.AttachLimit,
+		enableNodeExpansion: driverOpts.EnableNodeExpansion,
 	}
 }
 
@@ -186,6 +228,10 @@ func (h *hostpathV0CSIDriver) CreateDriver() {
 	node := nodes.Items[rand.Intn(len(nodes.Items))]
 	h.driverInfo.Config.ClientNodeName = node.Name
 	h.driverInfo.Config.ServerNodeName = node.Name
+
+	if m.enableNodeExpansion {
+		containerArgs = append(containerArgs, "--node-expand-required=true")
+	}
 
 	// TODO (?): the storage.csi.image.version and storage.csi.image.registry
 	// settings are ignored for this test. We could patch the image definitions.
