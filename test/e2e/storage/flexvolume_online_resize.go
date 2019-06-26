@@ -166,7 +166,7 @@ var _ = utils.SIGDescribe("Mounted flexvolume volume expand [Slow] [Feature:Expa
 		}
 
 		By("Waiting for cloudprovider resize to finish")
-		err = waitForControllerVolumeResize(pvc, c, totalResizeWaitPeriod)
+		err = waitForControllerVolumeResize(pvc, c)
 		Expect(err).NotTo(HaveOccurred(), "While waiting for pvc resize to finish")
 
 		By("Waiting for file system resize to finish")

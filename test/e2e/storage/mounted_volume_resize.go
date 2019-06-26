@@ -129,7 +129,7 @@ var _ = utils.SIGDescribe("Mounted volume expand[Slow]", func() {
 		}
 
 		By("Waiting for cloudprovider resize to finish")
-		err = waitForControllerVolumeResize(pvc, c, totalResizeWaitPeriod)
+		err = waitForControllerVolumeResize(pvc, c)
 		Expect(err).NotTo(HaveOccurred(), "While waiting for pvc resize to finish")
 
 		By("Getting a pod from deployment")
