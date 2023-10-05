@@ -38,6 +38,8 @@ const (
 	EtcdLearnerMode = "EtcdLearnerMode"
 	// UpgradeAddonsBeforeControlPlane is expected to be in deprecated in v1.28 and will be removed in future release
 	UpgradeAddonsBeforeControlPlane = "UpgradeAddonsBeforeControlPlane"
+	// KubeletLocalhostMode is expected to be in alpha in v1.30, beta in v1.31
+	KubeletLocalhostMode = "KubeletLocalhostMode"
 )
 
 // InitFeatureGates are the default feature gates for the init command
@@ -52,6 +54,8 @@ var InitFeatureGates = FeatureList{
 		FeatureSpec:        featuregate.FeatureSpec{Default: false, PreRelease: featuregate.Deprecated},
 		DeprecationMessage: "The UpgradeAddonsBeforeControlPlane feature gate is deprecated and will be removed in a future release.",
 	},
+	// TODO(chrischdi): this can't be Default true when introducing, but this is for testing purposes.
+	KubeletLocalhostMode: {FeatureSpec: featuregate.FeatureSpec{Default: true, PreRelease: featuregate.Alpha}},
 }
 
 // Feature represents a feature being gated

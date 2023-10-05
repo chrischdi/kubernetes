@@ -68,9 +68,27 @@ func NewControlPlaneJoinPhase() workflow.Phase {
 				RunAllSiblings: true,
 				ArgsValidator:  cobra.NoArgs,
 			},
-			newEtcdLocalSubphase(),
 			newUpdateStatusSubphase(),
 			newMarkControlPlaneSubphase(),
+		},
+	}
+}
+
+// NewControlPlaneJoinEtcdPhase creates a kubeadm workflow phase that implements joining etcd
+func NewControlPlaneJoinEtcdPhase() workflow.Phase {
+	return workflow.Phase{
+		Name:    "control-plane-join-etcd",
+		Short:   "Join etcd",
+		Example: controlPlaneJoinExample,
+		Phases: []workflow.Phase{
+			{
+				Name:           "all",
+				Short:          "Join etcd",
+				InheritFlags:   getControlPlaneJoinPhaseFlags("all"),
+				RunAllSiblings: true,
+				ArgsValidator:  cobra.NoArgs,
+			},
+			newEtcdLocalSubphase(),
 		},
 	}
 }
